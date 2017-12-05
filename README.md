@@ -14,11 +14,13 @@ the JCVI web API, and downloads these in tab separated text (`.tsv`). Example us
 This will make requests to the web API using 10 parallel workers, and write the
 output to `TIGRFAM_annotations.tsv`. The order of the output is random due to
 the parallel workers. If you _really_ need to have the table sorted, it's easy
-to just run the output file into GNU `sort` afterwards.
+to just run the output file into GNU `sort` afterwards. Please don't run this
+script with too many workers. Downloading annotations for all TIGRFAMs using
+the default setting of 20 workers takes about 5 minutes, the final table is about 4MB.
 
 It is also possible to download annotations for a subset of TIGRFAMs using the
 `--start` and `--end` arguments.  The script will then download information for
-all TIGRFAMS in the range from `--start` to `--end`.
+all TIGRFAMS in the range from `--start` to `--end` (inclusive).
 
 ## Count TIGRFAM annotations
 The `count_tigrfam_annotations.py` scripts parses `hmmsearch` table output
