@@ -1,7 +1,9 @@
 # TIGRFAM scripts
 Small utility scripts to make working with TIGRFAMs a bit more convenient.
-The main scripts are `download_tigrfam_annotations.py` and
-`count_tigrfam_annotations.py`. 
+The main scripts are:
+
+- `download_tigrfam_annotations.py` - Downloads TIGRFAM annotations from JCVI web site
+- `count_tigrfam_annotations.py` - Count TIGRFAM matches from `hmmsearch` table output
 
 ## Download TIGRFAM annotations
 The `download_tigrfam_annotations.py` script accesses TIGRFAM annotations via
@@ -26,17 +28,22 @@ downloaded using the download script, see above).
 
 
 # Deprecated
-There is a script called `info2table.py` that produces a tab separated table
-from TIGRFAM INFO files (usually downloaded from the TIGRFAM FTP server in a
-tarball, e.g. `TIGRFAMs_15.0_INFO.tar.gz`). This isn't very useful anymore,
-since the `download_tigrfam_annotations.py` script produces more annotation
-information. It seems the data in the INFO files isn't kept up to date any
-more.
+There are some old scripts still left in the repo:
 
-Another script is called `create_tigrfam_hierarchy.py`, which produces a tab
-separated table of the TIGRFAM, MAINROLE, and SUB1ROLE information available in
-the `TIGR_ROLE_NAMES` and `TIGR_ROLE_LINK` files, also usually downloaded from
-the TIGRFAM FTP.  It appears these files are no longer kept up to date.
+- `info2table.py`
+- `create_tigrfam_hierarchy.py`
+
+`info2table.py` produces a tab separated table from TIGRFAM INFO files (usually
+downloaded from the TIGRFAM FTP server in a tarball, e.g.
+`TIGRFAMs_15.0_INFO.tar.gz`). This isn't very useful anymore, since the
+`download_tigrfam_annotations.py` script produces more annotation information.
+It seems the data in the INFO files isn't kept entirely up to date any more.
+
+`create_tigrfam_hierarchy.py` produces a tab separated table of the TIGRFAM,
+MAINROLE, and SUB1ROLE information available in the `TIGR_ROLE_NAMES` and
+`TIGR_ROLE_LINK` files, also usually downloaded from the TIGRFAM FTP. This
+script is deprecated as it appears these files are no longer kept entirely up
+to date, and `download_tigrfam_annotations.py` produces more complete tables.
 
 # Contribue
 Feel free to contribue with pull requests if you see errors or things that need
