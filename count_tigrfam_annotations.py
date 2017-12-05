@@ -10,6 +10,7 @@ from sys import argv, exit
 from collections import namedtuple, Counter
 import logging
 import argparse
+import csv
 
 # namedtuple definitions
 Cutoffs = namedtuple("model_cutoffs",
@@ -24,8 +25,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-t", "--tbl", required=True,
             help="hmmsearch tbl output files.")
-    parser.add_argument("-c", "--cutoffs", required=True,
-            help="TIGRFAM cutoffs (in five column tab separated format produced by info2table.py).")
+    parser.add_argument("-a", "--annotations", required=True,
+            help="TIGRFAM annotations (in tab separated format produced by download_tigrfam_annotations.py).")
     parser.add_argument("-o", "--output", 
             default="tigrfam_annotation_counts.tsv",
             help="Output filename [%(default)s].")
@@ -37,22 +38,39 @@ def parse_args():
     return parser.parse_args()
 
 
-def read_tigrfam_cutoffs(cutoffs_table):
+def read_tigrfam_cutoffs(annotation_table):
     """
-    Parse TIGRFAM model cutoffs from tab separated format produced by info2table.py.
+    Parse TIGRFAM model cutoffs from tab separated annotation table produced by
+    download_tigrfam_annotations.py.
     """
     model_cutoffs = {} 
-    with open(cutoffs_table) as f:
-        f.readline()  # skip header
-        for rownum, line in enumerate(f):
-            accession, trusted_g, trusted_d, noise_g, noise_d = line.strip().split("\t")
-            try:
-                model_cutoffs[accession] = Cutoffs(accession, 
-                        float(trusted_g), float(trusted_d), float(noise_g), float(noise_d))
-            except ValueError:
-                logging.error("Couldn't parse line %s: %s", rownum, line)
-                exit(2)
-    logging.debug("Read model cutoffs for %s TIGRFAMs.", len(model_cutoffs))
+    with open(annotation_table) as f:
+        annotation_reader = csv.reader(f, delimiter="\t")
+        header = next(annotation_reader)
+        try:
+            for row in annotation_reader:
+                accession = row[0]
+                trusted_g = row[4]
+                trusted_d = row[5]
+                noise_g = row[6]
+                noise_d = row[7]
+                cutoffs_parsed = {"Trusted global": trusted_g, 
+                                  "Trusted domain": trusted_d, 
+                                  "Noise global": noise_g, 
+                                  "Noise domain": noise_d}
+                cutoffs_to_insert = []
+                for cutoff_name, cutoff in cutoffs_parsed.items():
+                    try:
+                        cutoffs_to_insert.append(float(cutoff))
+                    except ValueError:
+                        logging.warning("Couldn't interpret cutoff %14s ('%s') on line %s for %s, defaulting to 1e6.", 
+                                cutoff_name, cutoff, annotation_reader.line_num, accession)
+                        cutoffs_to_insert.append(1e6)
+                model_cutoffs[accession] = Cutoffs(accession, *cutoffs_to_insert)
+        except csv.Error as e:
+            logging.error("Couldn't parse annotation line %s: %s", annotation_reader.line_num, e)
+            exit(2)
+    logging.debug("Loaded model cutoffs for %s TIGRFAMs.", len(model_cutoffs))
     return model_cutoffs
 
 
@@ -79,7 +97,7 @@ def parse_hits(tbl_filename):
 
 if __name__ == "__main__":
     args = parse_args()
-    model_cutoffs = read_tigrfam_cutoffs(args.cutoffs)
+    model_cutoffs = read_tigrfam_cutoffs(args.annotations)
 
     filtered_hits = list(filter(
             lambda hit: hit.domain_score > model_cutoffs[hit.q_name].trusted_domain, 
