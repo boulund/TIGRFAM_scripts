@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # vim: syntax=python expandtab
-""" Read profile cutoffs from TIGRFAM INFO files into a single tab separated file.
+""" 
+Read profile cutoffs from TIGRFAM INFO files into a single tab separated file.
 """
 __author__ = "Fredrik Boulund"
 __date__ = "2017-11-07"
@@ -10,8 +11,12 @@ import argparse
 
 
 def parse_args():
-    
-    parser = argparse.ArgumentParser(description=__doc__)
+    desc = "{doc} Copyright {date} {author}.".format(
+            doc=__doc__,
+            date=__date__,
+            author=__author__
+            )
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("INFO", nargs="+", 
             help="TIGRFAM INFO files.")
     parser.add_argument("-o", "--output", 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # vim: syntax=python expandtab
 """ 
-Read TIGRFAM role names and role links to construct a hierachical index of TIGRFAMs.
+Read TIGRFAM role names and role links to construct a hierarchical index of TIGRFAMs.
 """
 __author__ = "Fredrik Boulund"
 __date__ = "2017-11-14"
@@ -13,7 +13,12 @@ import argparse
 
 def parse_args():
     
-    parser = argparse.ArgumentParser(description=__doc__)
+    desc = "{doc} Copyright {date} {author}.".format(
+            doc=__doc__,
+            date=__date__,
+            author=__author__
+            )
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("-n", "--role-names", dest="role_names", required=True,
             help="Path to TIGR_ROLE_NAMES.")
     parser.add_argument("-l", "--role-links", dest="role_links", required=True,
