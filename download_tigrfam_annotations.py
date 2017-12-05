@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # vim: syntax=python expandtab
 """
-Download all TIGRFAM annotations from JCVI webpage.
+Download TIGRFAM annotations from JCVI webpage.
 """
 __author__ = "Fredrik Boulund"
 __date__ = "2017-12-05"
 
 from sys import argv, exit
 import argparse
+import concurrent.futures
+from functools import partial
+
 import requests
 from bs4 import BeautifulSoup as bs
 
@@ -20,7 +23,7 @@ def parse_args():
             author=__author__
             )
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("-a", "--api-endpoint", dest="api_endpoint",
+    parser.add_argument("-a", "--api-endpoint", dest="api_endpoint", metavar="'URL'",
             default="http://www.jcvi.org/cgi-bin/tigrfams/HmmReportPage.cgi?acc=",
             help="JCVI TIGRFAMs HMM report page API access point [%(default)s].")
     parser.add_argument("-s", "--start", metavar="ID",
@@ -29,6 +32,9 @@ def parse_args():
     parser.add_argument("-e", "--end", metavar="ID",
             default="04571",
             help="End TIGRFAM ID to download to [%(default)s].")
+    parser.add_argument("-w", "--workers", metavar="N", type=int,
+            default=20,
+            help="Number of parallel download workers [%(default)s]")
     parser.add_argument("-o", "--output", required=True,
             default="TIGRFAM_complete_annotations.tsv",
             help="Output filename [%(default)s].")
@@ -90,6 +96,13 @@ def validate_entries(data, expected_keys, tigrfam):
     return data
 
 
+def download_tigrfam_and_parse_data(tigrfam, api_endpoint, expected_keys):
+    html_text = download_tigrfam_info(tigrfam, api_endpoint)
+    data = parse_tigrfam_info_table(html_text)
+    valid_data = validate_entries(data, expected_keys, tigrfam)
+    return valid_data
+
+
 if __name__ == "__main__":
     args = parse_args()
 
@@ -99,14 +112,20 @@ if __name__ == "__main__":
     expected_keys = ["Accession", "Name", "Function", "Gene_Symbol", "Trusted_Cutoff", "Domain_Trusted_Cutoff", "Noise_Cutoff", "Domain_Noise_Cutoff", "Isology_Type", "HMM_Length", "Mainrole_Category", "Subrole_Category", "Gene_Ontology_Term", "Author", "Entry_Date", "Last_Modified", "Comment", "References", "Genome_Property"]
     output_table_header = "\t".join(expected_keys)
 
+    downloaded_data = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+        futures = {executor.submit(download_tigrfam_and_parse_data, tigrfam, args.api_endpoint, expected_keys): tigrfam 
+                    for tigrfam in tigrfams_to_download}
+        for future in concurrent.futures.as_completed(futures):
+            tigrfam = futures[future]
+            try:
+                downloaded_data.append(future.result())
+            except Exception as e:
+                print("{} generated an exception: {}".format(tigrfam, e))
+    
     with open(args.output, 'w') as outfile:
         print(output_table_header, file=outfile)
-
-        for tigrfam in tigrfams_to_download:
-            print(tigrfam)
-            html_text = download_tigrfam_info(tigrfam, args.api_endpoint)
-            data = parse_tigrfam_info_table(html_text)
-            valid_data = validate_entries(data, expected_keys, tigrfam)
-            print(format_str.format(**valid_data), file=outfile)
+        for data in downloaded_data:
+            print(format_str.format(**data), file=outfile)
 
 
