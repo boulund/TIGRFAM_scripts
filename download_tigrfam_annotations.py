@@ -50,10 +50,9 @@ def sanitize_field(field_text):
     """
     Remove line breaks and other characters that might mess up table.
     """
-    strip_chars = ["""""",  # Newline
-                   """\n""",  # Newline
-                   """	""",  # Tab
-                   """""",  # Backspace
+    strip_chars = ['\r',  # Carriage return
+                   '\n',  # Newline
+                   '\t',  # Tab
                   ]
     sanitized_text = field_text
     for char in strip_chars:
@@ -108,8 +107,8 @@ if __name__ == "__main__":
 
     tigrfams_to_download = ["TIGR{:05d}".format(t) for t in range(int(args.start), int(args.end)+1)]
 
-    format_str = "{Accession}\t{Name}\t{Function}\t{Gene_Symbol}\t{Trusted_Cutoff}\t{Domain_Trusted_Cutoff}\t{Noise_Cutoff}\t{Domain_Noise_Cutoff}\t{Isology_Type}\t{HMM_Length}\t{Mainrole_Category}\t{Subrole_Category}\t{Gene_Ontology_Term}\t{Author}\t{Entry_Date}\t{Last_Modified}\t{Comment}\t{References}\t{Genome_Property}"
-    expected_keys = ["Accession", "Name", "Function", "Gene_Symbol", "Trusted_Cutoff", "Domain_Trusted_Cutoff", "Noise_Cutoff", "Domain_Noise_Cutoff", "Isology_Type", "HMM_Length", "Mainrole_Category", "Subrole_Category", "Gene_Ontology_Term", "Author", "Entry_Date", "Last_Modified", "Comment", "References", "Genome_Property"]
+    format_str = "{Accession}\t{Name}\t{Function}\t{Gene_Symbol}\t{Trusted_Cutoff}\t{Domain_Trusted_Cutoff}\t{Noise_Cutoff}\t{Domain_Noise_Cutoff}\t{Isology_Type}\t{EC_Number}\t{HMM_Length}\t{Mainrole_Category}\t{Subrole_Category}\t{Gene_Ontology_Term}\t{Author}\t{Entry_Date}\t{Last_Modified}\t{Comment}\t{References}\t{Genome_Property}"
+    expected_keys = ["Accession", "Name", "Function", "Gene_Symbol", "Trusted_Cutoff", "Domain_Trusted_Cutoff", "Noise_Cutoff", "Domain_Noise_Cutoff", "Isology_Type", "EC_Number", "HMM_Length", "Mainrole_Category", "Subrole_Category", "Gene_Ontology_Term", "Author", "Entry_Date", "Last_Modified", "Comment", "References", "Genome_Property"]
     output_table_header = "\t".join(expected_keys)
 
     downloaded_data = []
