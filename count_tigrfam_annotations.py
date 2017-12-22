@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # vim: syntax=python expandtab
 """
-Parse hmmsearch tbl output and use cutoffs from TIGRFAM INFO files to count annotations.
+Parse hmmsearch tbl output and use cutoffs from TIGRFAM annotations files to count 
+the number of valid assignments.
 """
 __author__ = "Fredrik Boulund"
 __date__ = "2017-11-14"
