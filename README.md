@@ -47,6 +47,6 @@ MAINROLE, and SUB1ROLE information available in the `TIGR_ROLE_NAMES` and
 script is deprecated as it appears these files are no longer kept entirely up
 to date, and `download_tigrfam_annotations.py` produces more complete tables.
 
-# Contribue
-Feel free to contribue with pull requests if you see errors or things that need
+# Contribute
+Feel free to contribute with pull requests if you see errors or things that need
 improvement.
