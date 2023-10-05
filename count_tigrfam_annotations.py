@@ -5,7 +5,7 @@ Parse hmmsearch tbl output and use cutoffs from TIGRFAM annotations files to cou
 the number of valid assignments.
 """
 __author__ = "Fredrik Boulund"
-__date__ = "2017-11-14"
+__date__ = "2023-10-05"
 
 from sys import argv, exit
 from collections import namedtuple, Counter
@@ -93,8 +93,19 @@ def parse_hits(tbl_filename):
                     float(domain_e_value), float(domain_score), float(domain_bias),
                     float(exp), int(reg), int(clu), int(ov), int(env),
                     int(dom), int(rep), int(inc), "".join(desc))
+            if not hit.q_acc in model_cutoffs:
+                logging.debug("Did not find annotation data for %s", hit.target)
+                continue
             yield hit
              
+
+def filter_hits(hits):
+    for hit in parse_hits(args.tbl):
+        if hit.q_name in model_cutoffs:
+            yield hit
+        else:
+            logging.warning(f"{hit} not in model_cutoffs")
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -102,7 +113,7 @@ if __name__ == "__main__":
 
     filtered_hits = list(filter(
             lambda hit: hit.domain_score > model_cutoffs[hit.q_name].trusted_domain, 
-            parse_hits(args.tbl)))
+            filter_hits(parse_hits(args.tbl))))
     tigrfam_counts = Counter(h.q_name for h in filtered_hits)
 
     with open(args.output, 'w') as outfile:
